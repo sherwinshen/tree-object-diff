@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "build": "rm -rf dist && rollup -c",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+		"test": "npm run build && node --test ./test/*"
   },
   "keywords": [
     "diff",

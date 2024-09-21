@@ -17,7 +17,10 @@ export type DiffItemT = {
   oldPath?: string[];
   newPath?: string[];
 };
-export type DiffResultT = Record<DIFF_TYPE, DiffItemT[]>;
+
+type DiffResultMapT = Record<DIFF_TYPE, DiffItemT[]>;
+type DiffResultListT = DiffItemT & { type: DIFF_TYPE }[];
+export type DiffResultT = { map: DiffResultMapT; list: DiffResultListT };
 
 export type CheckFuncType = (oldNode: TreeNodeT, newNode: TreeNodeT) => boolean;
 
@@ -60,7 +63,7 @@ const defaultGetNodeId = (node: TreeNodeT) => node?.id;
 const defaultSameNodeCheck = (oldNode: TreeNodeT, newNode: TreeNodeT) => defaultGetNodeId(oldNode) === defaultGetNodeId(newNode);
 const defaultSameValueCheck = (oldNode: TreeNodeT, newNode: TreeNodeT) => JSON.stringify(omitChildren(oldNode)) === JSON.stringify(omitChildren(newNode));
 
-export default function useTreeObjectDiff({
+export function useTreeObjectDiff({
   sameNodeCheck = defaultSameNodeCheck,
   sameValueCheck = defaultSameValueCheck,
   getNodeId = defaultGetNodeId,
@@ -69,22 +72,27 @@ export default function useTreeObjectDiff({
   sameValueCheck?: CheckFuncType;
   getNodeId?: (data: TreeNodeT) => string | number;
 } = {}) {
-  const diff = (oldData: TreeDataT, newData: TreeDataT): DiffResultT => {
+  const diff = (oldData: TreeDataT, newData: TreeDataT, mode: "map" | "list" = "map"): DiffResultMapT | DiffResultListT => {
     const differenceData: DiffResultT = {
-      [DIFF_TYPE.ADD]: [],
-      [DIFF_TYPE.DELETE]: [],
-      [DIFF_TYPE.UPDATE]: [],
-      [DIFF_TYPE.MOVE]: [],
+      map: {
+        [DIFF_TYPE.ADD]: [],
+        [DIFF_TYPE.DELETE]: [],
+        [DIFF_TYPE.UPDATE]: [],
+        [DIFF_TYPE.MOVE]: [],
+      },
+      list: [],
     };
 
     const addDiff = (type: DIFF_TYPE, oldNode: TreeNodeT | undefined, newNode: TreeNodeT | undefined, oldPath: string[], newPath: string[]) => {
       const isOmitChildren = type === DIFF_TYPE.ADD || type === DIFF_TYPE.DELETE;
-      differenceData[type].push({
-        oldNode: isOmitChildren && oldNode ? omitChildren(oldNode) : oldNode,
-        newNode: isOmitChildren && newNode ? omitChildren(newNode) : newNode,
+      const data = {
+        oldNode: !isOmitChildren && oldNode ? omitChildren(oldNode) : oldNode,
+        newNode: !isOmitChildren && newNode ? omitChildren(newNode) : newNode,
         oldPath,
         newPath,
-      });
+      };
+      differenceData.map[type].push(data);
+      differenceData.list.push({ type, ...data });
     };
 
     const diffSameLevel = (oldDataArray: TreeNodeT[], newDataArray: TreeNodeT[], oldPath: string[], newPath: string[]) => {
@@ -201,10 +209,13 @@ export default function useTreeObjectDiff({
 
     diffSameLevel(toArray(oldData), toArray(newData), [], []);
 
-    return differenceData;
+    return differenceData[mode];
   };
 
   return {
     diff,
   };
 }
+
+const { diff } = useTreeObjectDiff();
+export { diff };
