@@ -1,34 +1,34 @@
 {
   "name": "tree-object-diff",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "author": "SherwinShen",
   "description": "A utility for comparing and finding differences between tree-structured objects",
+  "license": "MIT",
+  "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "rm -rf dist && rollup -c",
     "prepublish": "npm run build",
-		"test": "npm run build && node --test ./test/*"
+    "test": "npm run build && node --test ./test/*"
   },
-  "keywords": [
-    "diff",
-    "comparison",
-    "tree",
-    "typescript"
+  "files": [
+    "dist"
   ],
-  "author": "SherwinShen",
-  "license": "MIT",
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/sherwinshen/tree-object-diff"
   },
   "homepage": "https://github.com/sherwinshen/tree-object-diff#readme",
   "bugs": "https://github.com/sherwinshen/tree-object-diff/microdiff/issues",
-  "devDependencies": {
+  "keywords": [
+    "diff",
+    "comparison",
+    "tree",
+    "typescript"
+  ],
+   "devDependencies": {
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
