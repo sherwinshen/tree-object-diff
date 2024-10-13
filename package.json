@@ -28,7 +28,7 @@
     "tree",
     "typescript"
   ],
-   "devDependencies": {
+  "devDependencies": {
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",

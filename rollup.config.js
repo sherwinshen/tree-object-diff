@@ -8,7 +8,7 @@ const packageJson = JSON.parse(readFileSync("./package.json", "utf8"));
 
 const config = [
   {
-    input: "index.ts",
+    input: "src/index.ts",
     output: [
       {
         file: packageJson.main,
