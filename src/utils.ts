@@ -20,7 +20,8 @@ export function flattenTree<TValues>(tree: Tree<TValues>) {
 function expandNodes<TValues>(flatNodes: FlatDiffTreeNode<TValues>[], parentNode: ID) {
   const children = flatNodes
     .filter(
-      ([, { oldNode, newNode }]) => (newNode?._context?.parentNode || oldNode?._context?.parentNode) === parentNode
+      ([, { oldNode, newNode }]) =>
+        newNode?._context?.parentNode === parentNode || oldNode?._context?.parentNode === parentNode
     )
     .sort(
       ([, { oldNode: oldNodeA, newNode: newNodeA }], [, { oldNode: oldNodeB, newNode: newNodeB }]) =>
