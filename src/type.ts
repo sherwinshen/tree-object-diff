@@ -28,6 +28,7 @@ export type FlatDiffTreeNodeValue<TValues> = {
   change: Change;
   oldNode?: FlatTreeNode<TValues>;
   newNode?: FlatTreeNode<TValues>;
+  isCross?: boolean;
 };
 export type FlatDiffTreeNode<TValues> = [ID, FlatDiffTreeNodeValue<TValues>];
 export type FlatDiffTree<TValues> = FlatDiffTreeNode<TValues>[];
@@ -40,6 +41,7 @@ export type DiffTreeNode<TValues> = {
     newPath?: string[];
     oldValue?: FlatTreeNodeValue<TValues>;
     oldPath?: string[];
+    isCross?: boolean;
   };
   children: DiffTreeNode<TValues>[];
 };

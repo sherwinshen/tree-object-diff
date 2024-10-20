@@ -80,6 +80,7 @@ const diff = <TValues>(
         {
           ...flatDiffTreeNodeValue,
           change: isUpdated ? [CHANGE_TYPE.Moved, CHANGE_TYPE.Updated] : [CHANGE_TYPE.Moved],
+          isCross: true,
         },
       ]);
     } else {
@@ -105,12 +106,17 @@ const diff = <TValues>(
         if (isUpdated) {
           movedAndUpdateNodes.push([
             newFlatNode.id,
-            { newNode: newFlatNode, oldNode: oldFlatNode, change: [CHANGE_TYPE.Moved, CHANGE_TYPE.Updated] },
+            {
+              newNode: newFlatNode,
+              oldNode: oldFlatNode,
+              change: [CHANGE_TYPE.Moved, CHANGE_TYPE.Updated],
+              isCross: false,
+            },
           ]);
         } else {
           movedNodes.push([
             newFlatNode.id,
-            { newNode: newFlatNode, oldNode: oldFlatNode, change: [CHANGE_TYPE.Moved] },
+            { newNode: newFlatNode, oldNode: oldFlatNode, change: [CHANGE_TYPE.Moved], isCross: false },
           ]);
         }
       }
@@ -137,7 +143,15 @@ const diff = <TValues>(
       : [CHANGE_TYPE.Moved, CHANGE_TYPE.Updated];
   }
   const flatDiffTree: FlatDiffTree<TValues> = [
-    [newRoot.id, { change: change as Change, newNode: newRoot, oldNode: oldNodeToNewRoot }],
+    [
+      newRoot.id,
+      {
+        change: change as Change,
+        newNode: newRoot,
+        oldNode: oldNodeToNewRoot,
+        isCross: change[0] === CHANGE_TYPE.Moved ? true : undefined,
+      },
+    ],
     ...[...deletedNodes, ...addedNodes, ...movedAndUpdateNodes, ...movedNodes, ...updatedNodes, ...unchangedNodes],
   ];
   let expandTreeResult: DiffTree<TValues>;
