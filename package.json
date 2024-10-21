@@ -10,7 +10,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf dist && rollup -c",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "test": "npm run build && node --test ./test/*"
   },
   "files": [
