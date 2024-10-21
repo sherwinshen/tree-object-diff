@@ -61,123 +61,125 @@ type Change =
 
 Here's a basic example of how to use TreeObjectDiff to compare two tree objects:
 
+![example](./example.png)
+
 ```typescript
 import { diff } from "tree-object-diff";
 
 const oldTreeObject = {
-  id: "root",
-  value: "root",
+  id: "1",
+  value: "a",
   children: [
-    { id: "1", value: "a", children: [] },
     { id: "2", value: "b", children: [] },
-    { id: "3", value: "c", children: [] },
-    { id: "4", value: "d", children: [] },
-    { id: "5", value: "e", children: [] },
+    {
+      id: "3",
+      value: "c",
+      children: [
+        { id: "4", value: "d", children: [] },
+        { id: "5", value: "e", children: [] },
+        { id: "6", value: "f", children: [] },
+      ],
+    },
+  ],
+};
+
+const newTreeObject = {
+  id: "1",
+  value: "a",
+  children: [
+    { id: "7", value: "g", children: [] },
+    {
+      id: "3",
+      value: "cc",
+      children: [
+        { id: "5", value: "e", children: [] },
+        { id: "4", value: "d", children: [] },
+      ],
+    },
     { id: "6", value: "f", children: [] },
   ],
 };
-const newTreeObject = {
-  id: "root",
-  value: "root",
-  children: [
-    { id: "5", value: "e", children: [] },
-    { id: "1", value: "a", children: [] },
-    { id: "2", value: "b", children: [] },
-    { id: "7", value: "g", children: [] },
-    { id: "3", value: "c", children: [] },
-    { id: "6", value: "ff", children: [] },
-  ],
-};
 
-const diffResult = diff(oldTreeObject, newTreeObject);
-
-[
-//   {
-//     "id": "root",
-//     "change": ["unchanged"],
-//     "detail": {
-//       "newValue": { "value": "root" },
-//       "newPath": [],
-//       "oldValue": { "value": "root" },
-//       "oldPath": []
-//     },
-//     "children": [
-//       {
-//         "id": "5",
-//         "change": ["moved"],
-//         "detail": {
-//           "newValue": { "value": "e" },
-//           "newPath": ["children", "0"],
-//           "oldValue": { "value": "e" },
-//           "oldPath": ["children", "4"]
-//         },
-//         "children": []
-//       },
-//       {
-//         "id": "1",
-//         "change": ["unchanged"],
-//         "detail": {
-//           "newValue": { "value": "a" },
-//           "newPath": ["children", "1"],
-//           "oldValue": { "value": "a" },
-//           "oldPath": ["children", "0"]
-//         },
-//         "children": []
-//       },
-//       {
-//         "id": "2",
-//         "change": ["unchanged"],
-//         "detail": {
-//           "newValue": { "value": "b" },
-//           "newPath": ["children", "2"],
-//           "oldValue": { "value": "b" },
-//           "oldPath": ["children", "1"]
-//         },
-//         "children": []
-//       },
-//       {
-//         "id": "4",
-//         "change": ["deleted"],
-//         "detail": {
-//           "oldValue": { "value": "d" },
-//           "oldPath": ["children", "3"]
-//         },
-//         "children": []
-//       },
-//       {
-//         "id": "7",
-//         "change": ["added"],
-//         "detail": {
-//           "newValue": { "value": "g" },
-//           "newPath": ["children", "3"]
-//         },
-//         "children": []
-//       },
-//       {
-//         "id": "3",
-//         "change": ["unchanged"],
-//         "detail": {
-//           "newValue": { "value": "c" },
-//           "newPath": ["children", "4"],
-//           "oldValue": { "value": "c" },
-//           "oldPath": ["children", "2"]
-//         },
-//         "children": []
-//       },
-//       {
-//         "id": "6",
-//         "change": ["updated"],
-//         "detail": {
-//           "newValue": { "value": "ff" },
-//           "newPath": ["children", "5"],
-//           "oldValue": { "value": "f" },
-//           "oldPath": ["children", "5"]
-//         },
-//         "children": []
-//       }
-//     ]
-//   }
-// ]
+/* ------------- result ------------- */
+const diffResult = [
+  {
+    id: "1",
+    change: ["unchanged"],
+    detail: {
+      newValue: { value: "a" },
+      newPath: [],
+      oldValue: { value: "a" },
+      oldPath: [],
+    },
+    children: [
+      {
+        id: "2",
+        change: ["deleted"],
+        detail: {
+          oldValue: { value: "b" },
+          oldPath: ["children", "0"],
+        },
+        children: [],
+      },
+      {
+        id: "7",
+        change: ["added"],
+        detail: {
+          newValue: { value: "g" },
+          newPath: ["children", "0"],
+        },
+        children: [],
+      },
+      {
+        id: "3",
+        change: ["updated"],
+        detail: {
+          newValue: { value: "cc" },
+          newPath: ["children", "1"],
+          oldValue: { value: "c" },
+          oldPath: ["children", "1"],
+        },
+        children: [
+          {
+            id: "5",
+            change: ["moved"],
+            detail: {
+              newValue: { value: "e" },
+              newPath: ["children", "1", "children", "0"],
+              oldValue: { value: "e" },
+              oldPath: ["children", "1", "children", "1"],
+              isCross: false,
+            },
+            children: [],
+          },
+          {
+            id: "4",
+            change: ["unchanged"],
+            detail: {
+              newValue: { value: "d" },
+              newPath: ["children", "1", "children", "1"],
+              oldValue: { value: "d" },
+              oldPath: ["children", "1", "children", "0"],
+            },
+            children: [],
+          },
+        ],
+      },
+      {
+        id: "6",
+        change: ["moved"],
+        detail: {
+          newValue: { value: "f" },
+          newPath: ["children", "2"],
+          oldValue: { value: "f" },
+          oldPath: ["children", "1", "children", "2"],
+          isCross: true,
+        },
+        children: [],
+      },
+    ],
+  },
+];
 ```
 
 Each node's identifier is `id`, which is used to detect additions, deletions, and movements. To compare if a node's value has changed, we stringify the node object (excluding the `children` field) and compare the results. Fortunately, we also support custom value comparison: Node value comparison is used to detect updates. You can customize these behaviors by providing your own comparison functions.
