@@ -6,7 +6,14 @@ export function flattenTree<TValues>(tree: Tree<TValues>) {
   function traverse(tree: TreeNode<TValues>, parentNode: ID, index: number, path: string[]) {
     const { id, children, ...value } = tree;
     flatTree.push([id, { id, value, _context: { parentNode, index, path } }]);
-    if (!children || children.length === 0) return;
+    if (
+      !children ||
+      !Array.isArray(children) ||
+      children.length === 0 ||
+      children.some((child: TreeNode<TValues>) => typeof child !== "object")
+    ) {
+      return;
+    }
     for (let index = 0; index < children.length; index++) {
       traverse(children[index], id, index, [...path, "children", String(index)]);
     }
