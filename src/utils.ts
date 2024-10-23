@@ -1,4 +1,4 @@
-import { DiffTreeNode, FlatDiffTree, FlatDiffTreeNode, FlatTree, ID, Tree, TreeNode } from "./type";
+import { CHANGE_TYPE, DiffTreeNode, FlatDiffTree, FlatDiffTreeNode, FlatTree, ID, Tree, TreeNode } from "./type";
 
 export function flattenTree<TValues>(tree: Tree<TValues>) {
   const flatTree: FlatTree<TValues> = [];
@@ -26,10 +26,15 @@ export function flattenTree<TValues>(tree: Tree<TValues>) {
 
 function expandNodes<TValues>(flatNodes: FlatDiffTreeNode<TValues>[], parentNode: ID) {
   const children = flatNodes
-    .filter(
-      ([, { oldNode, newNode }]) =>
-        newNode?._context?.parentNode === parentNode || oldNode?._context?.parentNode === parentNode
-    )
+    .filter(([, { oldNode, newNode, change }]) => {
+      if (newNode?._context?.parentNode === parentNode) {
+        return true;
+      }
+      if (change[0] === CHANGE_TYPE.Deleted && oldNode?._context?.parentNode === parentNode) {
+        return true;
+      }
+      return false;
+    })
     .sort(
       ([, { oldNode: oldNodeA, newNode: newNodeA }], [, { oldNode: oldNodeB, newNode: newNodeB }]) =>
         ((newNodeA || oldNodeA)?._context?.index ?? 0) - ((newNodeB || oldNodeB)?._context?.index ?? 0)
@@ -42,7 +47,7 @@ function expandNodes<TValues>(flatNodes: FlatDiffTreeNode<TValues>[], parentNode
           (oldNode?.id || newNode?.id) === (childOldNode?.id || childNewNode?.id)
       )
   );
-  return children.map(([_, { oldNode, newNode, change }]) => {
+  return children.map(([_, { oldNode, newNode, change, isCross }]) => {
     const id = newNode?.id || oldNode?.id;
     const expandedNode = {
       id,
@@ -52,6 +57,7 @@ function expandNodes<TValues>(flatNodes: FlatDiffTreeNode<TValues>[], parentNode
         newPath: newNode?._context?.path,
         oldValue: oldNode?.value,
         oldPath: oldNode?._context?.path,
+        isCross,
       },
 
       children: expandNodes(remainingNodes, id!),
@@ -63,7 +69,7 @@ function expandNodes<TValues>(flatNodes: FlatDiffTreeNode<TValues>[], parentNode
 
 export function expandTree<TValues>(flatTree: FlatDiffTree<TValues>): DiffTreeNode<TValues> {
   const [root, ...nodes] = flatTree;
-  const { newNode, oldNode, change } = root![1];
+  const { newNode, oldNode, change, isCross } = root![1];
   return {
     id: newNode?.id || oldNode?.id || "",
     change,
@@ -72,6 +78,7 @@ export function expandTree<TValues>(flatTree: FlatDiffTree<TValues>): DiffTreeNo
       newPath: newNode?._context.path,
       oldValue: oldNode?.value,
       oldPath: oldNode?._context.path,
+      isCross,
     },
     children: expandNodes(nodes, root[0]),
   };

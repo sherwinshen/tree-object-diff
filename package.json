@@ -1,6 +1,6 @@
 {
   "name": "tree-object-diff",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "author": "SherwinShen",
   "description": "A utility for comparing and finding differences between tree-structured objects",
   "license": "MIT",
