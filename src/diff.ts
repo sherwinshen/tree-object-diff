@@ -1,4 +1,4 @@
-import { Change, CHANGE_TYPE, DiffTree, FlatDiffTree, FlatTreeNode, Tree } from "./type";
+import { Change, CHANGE_TYPE, DiffResult, DiffTree, FlatDiffTree, FlatTreeNode, Tree } from "./type";
 import { expandTree, flattenTree, getLIS } from "./utils";
 
 const defaultValueEquality = <TValues>(a: TValues, b: TValues) => {
@@ -13,7 +13,8 @@ const diff = <TValues>(
   oldTree: Tree<TValues>,
   newTree: Tree<TValues>,
   config?: { valueEquality?: (a: TValues, b: TValues) => boolean }
-) => {
+): DiffResult<TValues> => {
+  let isChange = false;
   const oldFlatTree = flattenTree(oldTree);
   const oldRoot = oldFlatTree.shift()![1];
   const oldNodes = new Map(oldFlatTree);
@@ -102,23 +103,21 @@ const diff = <TValues>(
       if (lisArr.includes(index)) {
         const tmpNodes = isUpdated ? updatedNodes : unchangedNodes;
         tmpNodes.push([newFlatNode.id, { change, newNode: newFlatNode, oldNode: oldFlatNode }]);
+      } else if (isUpdated) {
+        movedAndUpdateNodes.push([
+          newFlatNode.id,
+          {
+            newNode: newFlatNode,
+            oldNode: oldFlatNode,
+            change: [CHANGE_TYPE.Moved, CHANGE_TYPE.Updated],
+            isCross: false,
+          },
+        ]);
       } else {
-        if (isUpdated) {
-          movedAndUpdateNodes.push([
-            newFlatNode.id,
-            {
-              newNode: newFlatNode,
-              oldNode: oldFlatNode,
-              change: [CHANGE_TYPE.Moved, CHANGE_TYPE.Updated],
-              isCross: false,
-            },
-          ]);
-        } else {
-          movedNodes.push([
-            newFlatNode.id,
-            { newNode: newFlatNode, oldNode: oldFlatNode, change: [CHANGE_TYPE.Moved], isCross: false },
-          ]);
-        }
+        movedNodes.push([
+          newFlatNode.id,
+          { newNode: newFlatNode, oldNode: oldFlatNode, change: [CHANGE_TYPE.Moved], isCross: false },
+        ]);
       }
     });
   });
@@ -129,7 +128,7 @@ const diff = <TValues>(
   const checkValueEquality = isSameRoot ? valueEquality(oldRoot.value as TValues, newRoot.value as TValues) : false;
   const checkNewValueEquality = isSameRoot
     ? checkValueEquality
-    : valueEquality(oldNodeToNewRoot!?.value as TValues, newRoot.value as TValues);
+    : valueEquality(oldNodeToNewRoot?.value as TValues, newRoot.value as TValues);
   let change;
   if (!oldNodeToNewRoot) {
     change = [CHANGE_TYPE.Added];
@@ -141,6 +140,12 @@ const diff = <TValues>(
       : checkNewValueEquality
       ? [CHANGE_TYPE.Moved]
       : [CHANGE_TYPE.Moved, CHANGE_TYPE.Updated];
+  }
+  isChange = Boolean(
+    deletedNodes.length || addedNodes.length || movedAndUpdateNodes.length || movedNodes.length || updatedNodes.length
+  );
+  if (change[0] !== CHANGE_TYPE.Unchanged) {
+    isChange = true;
   }
   const flatDiffTree: FlatDiffTree<TValues> = [
     [
@@ -156,6 +161,7 @@ const diff = <TValues>(
   ];
   let expandTreeResult: DiffTree<TValues>;
   if (oldRoot.id !== undefined && oldRoot.id !== newRoot.id && !newNodes.get(oldRoot.id)) {
+    isChange = true;
     expandTreeResult = [
       (expandTree(flatDiffTree),
       expandTree([[oldRoot.id, { oldNode: oldRoot, change: [CHANGE_TYPE.Deleted] }], ...deletedNodes])),
@@ -163,7 +169,7 @@ const diff = <TValues>(
   } else {
     expandTreeResult = [expandTree(flatDiffTree)];
   }
-  return expandTreeResult;
+  return { diffTree: expandTreeResult, isChange };
 };
 
 export { diff };

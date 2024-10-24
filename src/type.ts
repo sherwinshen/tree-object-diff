@@ -20,7 +20,7 @@ export type TreeNode<TValues> = { id: ID; children?: TreeNode<TValues>[] } & TVa
 export type Tree<TValues> = TreeNode<TValues>;
 
 export type FlatTreeNodeContext = { parentNode: ID; index: number; path: string[] };
-export type FlatTreeNodeValue<TValues> = Omit<TreeNode<TValues>, "id" | "children">;
+export type FlatTreeNodeValue<TValues> = { id: ID } & Omit<TreeNode<TValues>, "id" | "children">;
 export type FlatTreeNode<TValues> = { id: ID; value: FlatTreeNodeValue<TValues>; _context: FlatTreeNodeContext };
 export type FlatTree<TValues> = [ID, FlatTreeNode<TValues>][];
 
@@ -37,12 +37,13 @@ export type DiffTreeNode<TValues> = {
   id: ID;
   change: Change;
   detail: {
-    newValue?: FlatTreeNodeValue<TValues>;
+    newNode?: FlatTreeNodeValue<TValues>;
     newPath?: string[];
-    oldValue?: FlatTreeNodeValue<TValues>;
+    oldNode?: FlatTreeNodeValue<TValues>;
     oldPath?: string[];
     isCross?: boolean;
   };
   children: DiffTreeNode<TValues>[];
 };
-export type DiffTree<TValue> = [DiffTreeNode<TValue>] | [DiffTreeNode<TValue>, DiffTreeNode<TValue>];
+export type DiffTree<TValues> = [DiffTreeNode<TValues>] | [DiffTreeNode<TValues>, DiffTreeNode<TValues>];
+export type DiffResult<TValues> = { diffTree: DiffTree<TValues>; isChange: boolean };

@@ -37,14 +37,15 @@ type DiffTreeNode<TValues> = {
   id: number | string;
   change: Change;
   detail: {
-    newValue?: Omit<TreeNode<TValues>, "id" | "children">;
+    newNode?: Omit<TreeNode<TValues>, "children">;
     newPath?: string[];
-    oldValue?: Omit<TreeNode<TValues>, "id" | "children">;
+    oldNode?: Omit<TreeNode<TValues>, "children">;
     oldPath?: string[];
   };
   children: DiffTreeNode<TValues>[];
 };
 type DiffTree<TValue> = [DiffTreeNode<TValue>] | [DiffTreeNode<TValue>, DiffTreeNode<TValue>];
+type DiffResult<TValues> = { diffTree: DiffTree<TValues>; isChange: boolean };
 ```
 
 Where a `Change` is:
@@ -100,15 +101,18 @@ const newTreeObject = {
   ],
 };
 
+const { diffTree, isChange } = diff(oldTreeObject, newTreeObject);
+
 /* ------------- result ------------- */
-const diffResult = [
+const isChange = true;
+const diffTree = [
   {
     id: "1",
     change: ["unchanged"],
     detail: {
-      newValue: { value: "a" },
+      newNode: { "id": "1", value: "a" },
       newPath: [],
-      oldValue: { value: "a" },
+      oldNode: { "id": "1", value: "a" },
       oldPath: [],
     },
     children: [
@@ -116,7 +120,7 @@ const diffResult = [
         id: "2",
         change: ["deleted"],
         detail: {
-          oldValue: { value: "b" },
+          newNode: { "id": "2", value: "b" },
           oldPath: ["children", "0"],
         },
         children: [],
@@ -125,7 +129,7 @@ const diffResult = [
         id: "7",
         change: ["added"],
         detail: {
-          newValue: { value: "g" },
+          newNode: { "id": "7", value: "g" },
           newPath: ["children", "0"],
         },
         children: [],
@@ -134,9 +138,9 @@ const diffResult = [
         id: "3",
         change: ["updated"],
         detail: {
-          newValue: { value: "cc" },
+          newNode: { "id": "3", value: "cc" },
           newPath: ["children", "1"],
-          oldValue: { value: "c" },
+          oldNode: { "id": "3", value: "c" },
           oldPath: ["children", "1"],
         },
         children: [
@@ -144,9 +148,9 @@ const diffResult = [
             id: "5",
             change: ["moved"],
             detail: {
-              newValue: { value: "e" },
+              newNode: { "id": "5", value: "e" },
               newPath: ["children", "1", "children", "0"],
-              oldValue: { value: "e" },
+              oldNode: { "id": "5", value: "e" },
               oldPath: ["children", "1", "children", "1"],
               isCross: false,
             },
@@ -156,9 +160,9 @@ const diffResult = [
             id: "4",
             change: ["unchanged"],
             detail: {
-              newValue: { value: "d" },
+              newNode: { "id": "4", value: "d" },
               newPath: ["children", "1", "children", "1"],
-              oldValue: { value: "d" },
+              oldNode: { "id": "4", value: "d" },
               oldPath: ["children", "1", "children", "0"],
             },
             children: [],
@@ -169,9 +173,9 @@ const diffResult = [
         id: "6",
         change: ["moved"],
         detail: {
-          newValue: { value: "f" },
+          newNode: { id: "6", value: "f" },
           newPath: ["children", "2"],
-          oldValue: { value: "f" },
+          oldNode: { id: "6", value: "f" },
           oldPath: ["children", "1", "children", "2"],
           isCross: true,
         },
@@ -188,7 +192,7 @@ Each node's identifier is `id`, which is used to detect additions, deletions, an
 import { diff } from "tree-object-diff";
 
 const sameNodeValue = (oldNode, newNode) => oldNode.curValue === newNode.curValue;
-const diffDetail = diff(oldTree, newTree, { valueEquality: sameNodeValue });
+const { diffTree, isChange } = diff(oldTree, newTree, { valueEquality: sameNodeValue });
 ```
 
 # License

@@ -5,7 +5,7 @@ export function flattenTree<TValues>(tree: Tree<TValues>) {
 
   function traverse(tree: TreeNode<TValues>, parentNode: ID, index: number, path: string[]) {
     const { id, children, ...value } = tree;
-    flatTree.push([id, { id, value, _context: { parentNode, index, path } }]);
+    flatTree.push([id, { id, value: { id, ...value }, _context: { parentNode, index, path } }]);
     if (
       !children ||
       !Array.isArray(children) ||
@@ -53,16 +53,14 @@ function expandNodes<TValues>(flatNodes: FlatDiffTreeNode<TValues>[], parentNode
       id,
       change,
       detail: {
-        newValue: newNode?.value,
+        newNode: newNode?.value,
         newPath: newNode?._context?.path,
-        oldValue: oldNode?.value,
+        oldNode: oldNode?.value,
         oldPath: oldNode?._context?.path,
         isCross,
       },
-
       children: expandNodes(remainingNodes, id!),
     } as DiffTreeNode<TValues>;
-
     return expandedNode;
   });
 }
@@ -74,9 +72,9 @@ export function expandTree<TValues>(flatTree: FlatDiffTree<TValues>): DiffTreeNo
     id: newNode?.id || oldNode?.id || "",
     change,
     detail: {
-      newValue: newNode?.value,
+      newNode: newNode?.value,
       newPath: newNode?._context.path,
-      oldValue: oldNode?.value,
+      oldNode: oldNode?.value,
       oldPath: oldNode?._context.path,
       isCross,
     },
